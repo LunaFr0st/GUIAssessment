@@ -29,7 +29,7 @@ namespace AssignmentGUI
             #region GUI Styling
             // Title Label Styling
             titleStyler.fontSize = (Screen.width / 16) + (Screen.height / 9);
-            titleStyler.normal.textColor = Color.white;
+            titleStyler.normal.textColor = Color.black;
             titleStyler.font = font;
             // Play Button Styling
             playStyler.fontSize = ((Screen.width / 24) + (Screen.height / 11));
@@ -49,16 +49,16 @@ namespace AssignmentGUI
             //GUI.Box(new Rect(0, 0, Screen.width, Screen.height), GUITexture.texture(texture));
             GUI.Label(new Rect(0.25f * sW, 3f * sH, 0, 0), "Slasher Game", titleStyler);//titleStyler
 
-            if (GUI.Button(new Rect(0.25f * sW, 5f * sH, 3 * sW, 1.5f * sH), "Play", playStyler))//playStyler
+            if (GUI.Button(new Rect(0.25f * sW, 5f * sH, 2.7f * sW, 1.6f * sH), "Play", playStyler))//playStyler
             {
                 print("Loading Game...");
                 SceneManager.LoadSceneAsync(1);
             }
-            if (GUI.Button(new Rect(0.25f * sW, 6.7f * sH, 1.5f * sW, 1f * sH), "Options", styler))//styler
+            if (GUI.Button(new Rect(0.25f * sW, 6.7f * sH, 3.2f * sW, 1f * sH), "Options", styler))//styler
             {
                 print("Options");
             }
-            if (GUI.Button(new Rect(0.25f * sW, 7.8f * sH, 1.5f * sW, 1f * sH), "Exit", styler))//styler
+            if (GUI.Button(new Rect(0.25f * sW, 7.8f * sH, 1.75f * sW, 0.75f * sH), "Exit", styler))//styler
             {
                 print("Exiting Game");
                 Application.Quit();
