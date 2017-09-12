@@ -1,21 +1,22 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+
 namespace AssignmentGUI
 {
     public class GUIManager : MonoBehaviour
     {
         public GUIStyle titleStyler = new GUIStyle();
+        public GUIStyle playStyler = new GUIStyle();
         public GUIStyle styler = new GUIStyle();
+        public GUILayout layout = new GUILayout();
         public Font font;
+        public Texture texture;
+
 
         private float sW;
         private float sH;
-
-        void Start()
-        {
-
-        }
 
         void Update()
         {
@@ -25,23 +26,44 @@ namespace AssignmentGUI
 
         void OnGUI()
         {
+            #region GUI Styling
+            // Title Label Styling
             titleStyler.fontSize = (Screen.width / 16) + (Screen.height / 9);
             titleStyler.normal.textColor = Color.white;
             titleStyler.font = font;
+            // Play Button Styling
+            playStyler.fontSize = ((Screen.width / 24) + (Screen.height / 11));
+            playStyler.font = font;
+            playStyler.normal.textColor = Color.grey;
+            playStyler.hover.textColor = Color.white;
+            playStyler.active.textColor = Color.black;
 
-            styler.fontSize = ((Screen.width / 24) + (Screen.height / 11));
-            styler.normal.textColor = Color.grey;
+            // Options and Exit Button Styling
+            styler.fontSize = ((Screen.width / 32) + (Screen.height / 18));
             styler.font = font;
+            styler.normal.textColor = Color.grey;
             styler.hover.textColor = Color.white;
-            styler.active.textColor = Color.gray;
+            styler.active.textColor = Color.black;
+            #endregion
+            //GUI.DrawTexture(new Rect(0, 0, Screen.width, Screen.height), texture, ScaleMode.StretchToFill);
+            //GUI.Box(new Rect(0, 0, Screen.width, Screen.height), GUITexture.texture(texture));
+            GUI.Label(new Rect(0.25f * sW, 3f * sH, 0, 0), "Slasher Game", titleStyler);//titleStyler
 
-            GUI.Box(new Rect(0, 0, Screen.width, Screen.height), "");
-            GUI.Label(new Rect(0.25f * sW, 3f * sH, 0, 0), "Roger That!", titleStyler);
-            if (GUI.Button(new Rect(0.25f * sW, 5f * sH, 3 * sW, 0.5f * sH), "Play", styler))
+            if (GUI.Button(new Rect(0.25f * sW, 5f * sH, 3 * sW, 1.5f * sH), "Play", playStyler))//playStyler
             {
-
+                print("Loading Game...");
+                SceneManager.LoadSceneAsync(1);
             }
+            if (GUI.Button(new Rect(0.25f * sW, 6.7f * sH, 1.5f * sW, 1f * sH), "Options", styler))//styler
+            {
+                print("Options");
+            }
+            if (GUI.Button(new Rect(0.25f * sW, 7.8f * sH, 1.5f * sW, 1f * sH), "Exit", styler))//styler
+            {
+                print("Exiting Game");
+                Application.Quit();
+            }
+
         }
     }
 }
-
