@@ -13,6 +13,8 @@ namespace AssignmentGUI
         public GUILayout layout = new GUILayout();
         public Font font;
         public Texture texture;
+        [Range(0f, 1f)]
+        public float hue, saturation, value;
 
 
         private float sW;
@@ -34,14 +36,14 @@ namespace AssignmentGUI
             // Play Button Styling
             playStyler.fontSize = ((Screen.width / 24) + (Screen.height / 11));
             playStyler.font = font;
-            playStyler.normal.textColor = Color.grey;
+            playStyler.normal.textColor = Color.HSVToRGB(hue,saturation,value);
             playStyler.hover.textColor = Color.white;
             playStyler.active.textColor = Color.black;
 
             // Options and Exit Button Styling
             styler.fontSize = ((Screen.width / 32) + (Screen.height / 18));
             styler.font = font;
-            styler.normal.textColor = Color.grey;
+            styler.normal.textColor = Color.HSVToRGB(hue, saturation, value);
             styler.hover.textColor = Color.white;
             styler.active.textColor = Color.black;
             #endregion
