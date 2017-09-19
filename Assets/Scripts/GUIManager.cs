@@ -15,9 +15,11 @@ namespace AssignmentGUI
         public GUIStyle optionsMenuStyler = new GUIStyle();
         public GUILayout layout = new GUILayout();
         public GUIStyle boxStyle = new GUIStyle();
+        public GUIStyle sliderStyle = new GUIStyle();
         public Font font;
         public Font optionsFont;
         public Texture texture;
+        public Texture2D sliderBG;
         [Range(0f, 1f)]
         public float hue, saturation, value;
         [Header("Key Binding")]
@@ -35,7 +37,10 @@ namespace AssignmentGUI
         public bool showOptions;
         public bool showVolume;
         public bool showBrightness;
+        public bool showResolution;
         public bool startRGB;
+        [Header("Text")]
+        private string currRes;
         [Header("Sliders")]
         public float volumeSlider, holdingVolume;
         public float brightnessSlider;
@@ -95,16 +100,18 @@ namespace AssignmentGUI
 
             //Options Title Styling
             optionsStyler.fontSize = ((Screen.width / 24) + (Screen.height / 11));
-            optionsStyler.font = optionsFont;
-            optionsStyler.normal.textColor = Color.black;
+            optionsStyler.font = font;
+            optionsStyler.normal.textColor = Color.white;
 
             //Options Buttons Styling
-            optionsStyler.fontSize = ((Screen.width / 32) + (Screen.height / 18));
-            optionsStyler.font = optionsFont;
-            optionsStyler.normal.textColor = Color.HSVToRGB(hue, saturation, value);
-            optionsStyler.hover.textColor = Color.white;
-            optionsStyler.active.textColor = Color.black;
+            optionsMenuStyler.fontSize = ((Screen.width / 32) + (Screen.height / 18));
+            optionsMenuStyler.font = font;
+            optionsMenuStyler.normal.textColor = Color.HSVToRGB(hue, saturation, value);
+            optionsMenuStyler.hover.textColor = Color.white;
+            optionsMenuStyler.active.textColor = Color.red;
 
+            //Slider Styling
+            sliderStyle.active.background = sliderBG;
             #endregion
 
             if (!showOptions)
@@ -130,28 +137,38 @@ namespace AssignmentGUI
             if (showOptions)
             {
                 int spacer = 0;
-
+                GUI.Box(new Rect(0, 0, 9 * sW, 10 * sH), "");
                 GUI.Label(new Rect(0.25f * sW, 1f * sH, 0, 0), "Options", optionsStyler);
-                if (GUI.Button(new Rect(sW, (3.5f * sH) + (spacer * sW), sW, sH), "Volume - " + (volumeSlider * 100).ToString("F0") + "%", optionsMenuStyler))//playStyler
+                if (GUI.Button(new Rect(sW, (3.5f * sH) + (spacer * sW), 2.55f*sW, sH), "Volume        > " + (volumeSlider * 100).ToString("F0"), optionsMenuStyler))//playStyler
                 {
                     showVolume = !showVolume;
                 }
-                if (showVolume && showBrightness == false)
+                if (showVolume)
                 {
-                    GUI.Box(new Rect(2.5f * sW, (2.75f * sH) + (spacer * sW), 0.5f * sW, 2 * sH), "");
-                    volumeSlider = GUI.VerticalSlider(new Rect(2.67f * sW, (2.75f * sH) + (spacer * sW), 2 * sW, 2 * sH), volumeSlider, 0, 1);
+                    showBrightness = false;
+                    GUI.Box(new Rect(8f * sW, (2.75f * sH) + (spacer * sW), 0.5f * sW, 2 * sH), "",sliderStyle);
+                    volumeSlider = GUI.VerticalSlider(new Rect(8.17f * sW, (2.75f * sH) + (spacer * sW), 2 * sW, 2 * sH), volumeSlider, 1, 0);
                 }
                 spacer++;
-                if (GUI.Button(new Rect(sW, (3.5f * sH) + (spacer * sW), sW, sH), "Brightness", optionsMenuStyler))//styler
+                if (GUI.Button(new Rect(sW, (3.5f * sH) + (spacer * sW), 4.5f*sW, sH), "Brightness > " + (brightnessSlider * 100).ToString("F0"), optionsMenuStyler))//styler
                 {
-                    print("Options");
-                    showOptions = true;
+                    showBrightness = !showBrightness;
+                }
+                if (showBrightness)
+                {
+                    showVolume = false;
+                    GUI.Box(new Rect(8f * sW, (2.75f * sH) + (spacer * sW), 0.5f * sW, 2 * sH), "", sliderStyle);
+                    brightnessSlider = GUI.VerticalSlider(new Rect(8.17f * sW, (2.75f * sH) + (spacer * sW), 2 * sW, 2 * sH), brightnessSlider, 1, 0);
                 }
                 spacer++;
                 if (GUI.Button(new Rect(sW, (3.5f * sH) + (spacer * sW), sW, sH), "Resoultion", optionsMenuStyler))//styler
                 {
                     print("Options");
-                    showOptions = true;
+                    showResolution = !showResolution;
+                }
+                if (showResolution)
+                {
+                    GUI.Button(new Rect(sW, sH, sW, sH), currRes);
                 }
                 spacer++;
                 if (GUI.Button(new Rect(sW, (3.5f * sH) + (spacer * sW), sW, sH), "Back", optionsMenuStyler))//styler
@@ -161,6 +178,7 @@ namespace AssignmentGUI
                 }
             }
         }
+        #region Keybinding
         public void Forward()
         {
             //if none of the other keys are blank
@@ -257,5 +275,6 @@ namespace AssignmentGUI
                 interact = KeyCode.None;
             }
         }
+        #endregion
     }
 }
