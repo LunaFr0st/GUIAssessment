@@ -45,12 +45,15 @@ namespace AssignmentGUI
         public float volumeSlider, holdingVolume;
         public float brightnessSlider;
 
+        INIParser ini = new INIParser();
         private float sW;
         private float sH;
 
         void Awake()
         {
-
+            ini.Open("C:/BUILDS/GUIAssignment.ini");
+            ini.ReadValue("Sliders", "valueVolumeSlider", volumeSlider);
+            ini.Close();
         }
 
 
@@ -75,6 +78,18 @@ namespace AssignmentGUI
                 hue = 0;
 
             }
+            WriteFile();
+        }
+
+        public void WriteFile()
+        {
+            ini.Open("C:/BUILDS/GUIAssignment.ini");
+            ini.WriteValue("Sliders","valueVolumeSlider",volumeSlider);
+            ini.Close();
+        }
+        public void Load()
+        {
+            
         }
 
         void OnGUI()
