@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor;
 using UnityEngine.SceneManagement;
 
 namespace AssignmentGUI
@@ -44,15 +45,19 @@ namespace AssignmentGUI
         [Header("Sliders")]
         public float volumeSlider, holdingVolume;
         public float brightnessSlider;
-
+        string path;
         INIParser ini = new INIParser();
+
         private float sW;
         private float sH;
 
         void Awake()
         {
-            ini.Open("C:/BUILDS/GUIAssignment.ini");
-            ini.ReadValue("Sliders", "valueVolumeSlider", volumeSlider);
+            path = Application.dataPath;
+            Debug.Log(path + "/Scripts/GUIAssesment.ini");
+
+            ini.Open("C:/Users/cody.amies1/Source/Repos/GUIAssessment/Assets/Scripts");
+            ini.ReadValue("Sliders", "bVolume", 1);
             ini.Close();
         }
 
@@ -78,18 +83,19 @@ namespace AssignmentGUI
                 hue = 0;
 
             }
-            WriteFile();
+
         }
 
         public void WriteFile()
         {
-            ini.Open("C:/BUILDS/GUIAssignment.ini");
-            ini.WriteValue("Sliders","valueVolumeSlider",volumeSlider);
+
+            ini.Open("C:/Users/cody.amies1/Source/Repos/GUIAssessment/Assets/Scripts");
+            ini.WriteValue("Sliders", "bVolume", volumeSlider);
             ini.Close();
         }
         public void Load()
         {
-            
+
         }
 
         void OnGUI()
@@ -154,18 +160,18 @@ namespace AssignmentGUI
                 int spacer = 0;
                 GUI.Box(new Rect(0, 0, 9 * sW, 10 * sH), "");
                 GUI.Label(new Rect(0.25f * sW, 1f * sH, 0, 0), "Options", optionsStyler);
-                if (GUI.Button(new Rect(sW, (3.5f * sH) + (spacer * sW), 2.55f*sW, sH), "Volume        > " + (volumeSlider * 100).ToString("F0"), optionsMenuStyler))//playStyler
+                if (GUI.Button(new Rect(sW, (3.5f * sH) + (spacer * sW), 2.55f * sW, sH), "Volume        > " + (volumeSlider * 100).ToString("F0"), optionsMenuStyler))//playStyler
                 {
                     showVolume = !showVolume;
                 }
                 if (showVolume)
                 {
                     showBrightness = false;
-                    GUI.Box(new Rect(8f * sW, (2.75f * sH) + (spacer * sW), 0.5f * sW, 2 * sH), "",sliderStyle);
+                    GUI.Box(new Rect(8f * sW, (2.75f * sH) + (spacer * sW), 0.5f * sW, 2 * sH), "", sliderStyle);
                     volumeSlider = GUI.VerticalSlider(new Rect(8.17f * sW, (2.75f * sH) + (spacer * sW), 2 * sW, 2 * sH), volumeSlider, 1, 0);
                 }
                 spacer++;
-                if (GUI.Button(new Rect(sW, (3.5f * sH) + (spacer * sW), 4.5f*sW, sH), "Brightness > " + (brightnessSlider * 100).ToString("F0"), optionsMenuStyler))//styler
+                if (GUI.Button(new Rect(sW, (3.5f * sH) + (spacer * sW), 4.5f * sW, sH), "Brightness > " + (brightnessSlider * 100).ToString("F0"), optionsMenuStyler))//styler
                 {
                     showBrightness = !showBrightness;
                 }
@@ -186,11 +192,17 @@ namespace AssignmentGUI
                     GUI.Button(new Rect(sW, sH, sW, sH), currRes);
                 }
                 spacer++;
+                if (GUI.Button(new Rect(sW, (3.5f * sH) + (spacer * sW), sW, sH), "Apply", optionsMenuStyler))
+                {
+                    WriteFile();
+                }
+                spacer++;
                 if (GUI.Button(new Rect(sW, (3.5f * sH) + (spacer * sW), sW, sH), "Back", optionsMenuStyler))//styler
                 {
                     print("Going Back to main Menu");
                     showOptions = false;
                 }
+
             }
         }
         #region Keybinding
