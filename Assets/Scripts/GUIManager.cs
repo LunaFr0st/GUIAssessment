@@ -42,6 +42,9 @@ namespace AssignmentGUI
         public bool startRGB;
         [Header("Text")]
         private string currRes;
+        [Header("Resolution")]
+        private int[] scrH;
+        private int[] scrW;
         [Header("Sliders")]
         public float volumeSlider, holdingVolume;
         public float brightnessSlider;
