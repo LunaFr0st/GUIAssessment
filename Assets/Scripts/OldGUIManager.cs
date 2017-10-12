@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -33,6 +34,15 @@ namespace AssignmentGUI
         public KeyCode sprint;
         public KeyCode crouch;
         private KeyCode holdingKey;
+        [Header("KeyBindsStrings")]
+        string forwardText;
+        string backwardText;
+        string leftText;
+        string rightText;
+        string interactText;
+        string jumpText;
+        string crouchText;
+        string sprintText;
         [Header("Booleans")]
         public bool showControls;
         public bool showOptions;
@@ -40,7 +50,9 @@ namespace AssignmentGUI
         public bool showBrightness;
         public bool showResolution;
         public bool fullScreenMode;
+        public bool enableControls;
         public bool startRGB;
+        public bool muteToggle;
         [Header("Text")]
         private string currRes;
         [Header("Resolution")]
@@ -49,6 +61,9 @@ namespace AssignmentGUI
         [Header("Sliders")]
         public float volumeSlider, holdingVolume;
         public float brightnessSlider;
+        [Header("Audio & Light")]
+        public AudioSource music;
+        public Light dirLight;
 
         private Vector2 scrollPositon = Vector2.zero;
         private float sW;
@@ -60,26 +75,17 @@ namespace AssignmentGUI
         void Start()
         {
             path = Application.dataPath;
-            ////Debug.Log(Application.persistentDataPath);
-            //inip = new IniFile("GUI");
-            ////inip.Set("aVolume", 10);
-            //Debug.Log(inip.Get("aVolume"));
-
-
             Debug.Log(path + "/Scripts/GUIAssesment.ini");
-
-            //ini.Open("C:/Users/cody.amies1/Source/Repos/GUIAssessment/Assets/Scripts");
             ini.Open(path + "/Scripts/GUIAssesment.ini");
-            Debug.Log(ini.ReadValue("Sliders", "bVolume", "bVolume"));
             //KeyBinds Strings
-            string forwardText = ini.ReadValue("Key Binds", "inputForward", "inputForward");
-            string backwardText = ini.ReadValue("Key Binds", "inputBackward", "inputBackward");
-            string leftText = ini.ReadValue("Key Binds", "inputLeft", "inputLeft");
-            string rightText = ini.ReadValue("Key Binds", "inputRight", "inputRight");
-            string interactText = ini.ReadValue("Key Binds", "inputInteract", "inputInteract");
-            string jumpText = ini.ReadValue("Key Binds", "inputJump", "inputJump");
-            string crouchText = ini.ReadValue("Key Binds", "inputCrouch", "inputCrouch");
-            string sprintText = ini.ReadValue("Key Binds", "inputSprint", "inputSprint");
+            forwardText = ini.ReadValue("Key Binds", "inputForward", "inputForward");
+            backwardText = ini.ReadValue("Key Binds", "inputBackward", "inputBackward");
+            leftText = ini.ReadValue("Key Binds", "inputLeft", "inputLeft");
+            rightText = ini.ReadValue("Key Binds", "inputRight", "inputRight");
+            interactText = ini.ReadValue("Key Binds", "inputInteract", "inputInteract");
+            jumpText = ini.ReadValue("Key Binds", "inputJump", "inputJump");
+            crouchText = ini.ReadValue("Key Binds", "inputCrouch", "inputCrouch");
+            sprintText = ini.ReadValue("Key Binds", "inputSprint", "inputSprint");
             //Slider Values
             string volumeValue = ini.ReadValue("Sliders", "bVolume", "bVolume");
             string brightnessValue = ini.ReadValue("Sliders", "bBrightness", "bBrightness");
@@ -104,8 +110,13 @@ namespace AssignmentGUI
             sW = int.Parse(resXValue);
             sH = int.Parse(resYValue);
             //Bool convert
-            startRGB = bool.Parse(RGBBool);
+            startRGB = Convert.ToBoolean(RGBBool);
             ini.Close();
+
+            dirLight = GameObject.FindGameObjectWithTag("MainLight").GetComponent<Light>();
+            music = GameObject.Find("MainMusic").GetComponent<AudioSource>();
+            volumeSlider = music.volume;
+            brightnessSlider = dirLight.intensity;
         }
 
 
@@ -140,6 +151,33 @@ namespace AssignmentGUI
             {
                 currRes = Screen.width + "x" + Screen.height;
             }
+
+            if (music != null)
+            {
+                if (muteToggle == false)
+                {
+                    if (music.volume != volumeSlider)
+                    {
+                        holdingVolume = volumeSlider;
+                        music.volume = volumeSlider;
+                    }
+                }
+                else
+                {
+                    volumeSlider = 0;
+                    music.volume = 0;
+                }
+            }
+            if (dirLight != null)
+            {
+                if (brightnessSlider != dirLight.intensity)
+                {
+                    dirLight.intensity = brightnessSlider;
+                }
+            }
+
+
+
         }
 
         public void WriteFile()
@@ -148,14 +186,14 @@ namespace AssignmentGUI
             ini.Open(path + "/Scripts/GUIAssesment.ini");
             ini.WriteValue("Sliders", "bVolume", volumeSlider);
             ini.WriteValue("Sliders", "bBrightness", brightnessSlider);
-            ini.WriteValue("Key Codes", "inputForward", forward.ToString());
-            ini.WriteValue("Key Codes", "inputBackward", backward.ToString());
-            ini.WriteValue("Key Codes", "inputLeft", left.ToString());
-            ini.WriteValue("Key Codes", "inputRight", right.ToString());
-            ini.WriteValue("Key Codes", "inputInteract", interact.ToString());
-            ini.WriteValue("Key Codes", "inputJump", jump.ToString());
-            ini.WriteValue("Key Codes", "inputCrouch", crouch.ToString());
-            ini.WriteValue("Key Codes", "inputSprint", sprint.ToString());
+            ini.WriteValue("Key Binds", "inputForward", forward.ToString());
+            ini.WriteValue("Key Binds", "inputBackward", backward.ToString());
+            ini.WriteValue("Key Binds", "inputLeft", left.ToString());
+            ini.WriteValue("Key Binds", "inputRight", right.ToString());
+            ini.WriteValue("Key Binds", "inputInteract", interact.ToString());
+            ini.WriteValue("Key Binds", "inputJump", jump.ToString());
+            ini.WriteValue("Key Binds", "inputCrouch", crouch.ToString());
+            ini.WriteValue("Key Binds", "inputSprint", sprint.ToString());
             ini.WriteValue("Resolution", "bScreenX", sW);
             ini.WriteValue("Resolution", "bScreenY", sH);
             ini.WriteValue("Booleans", "bRGBMode", startRGB);
@@ -168,6 +206,8 @@ namespace AssignmentGUI
 
         void OnGUI()
         {
+            Event e = Event.current;
+
             #region GUI Styling
             // Title Label Styling
             titleStyler.fontSize = (Screen.width / 16) + (Screen.height / 9);
@@ -229,191 +269,363 @@ namespace AssignmentGUI
                     print("Exiting Game");
                     Application.Quit();
                 }
+                //Debug.Log("Key: " + e.keyCode);
             }
             if (showOptions)
             {
                 int spacer = 0;
                 GUI.Box(new Rect(0, 0, 11 * sW, 10 * sH), "");
-                GUI.Label(new Rect(0.25f * sW, 1f * sH, 0, 0), "Options", optionsStyler);
-                if (GUI.Button(new Rect(sW, (3.5f * sH) + (spacer * sW), 5f * sW, sH), "Volume        > " + (volumeSlider * 100).ToString("F0"), optionsMenuStyler))//playStyler
+                enableControls = !enableControls;
+                if (enableControls)
                 {
-                    showVolume = !showVolume;
-                    showBrightness = false;
-                    showResolution = false;
-                    showControls = false;
-                }
-                if (showVolume)
-                {
-                    showBrightness = false;
-                    GUI.Box(new Rect(8f * sW, (2.75f * sH) + (spacer * sW), 0.5f * sW, 2 * sH), "", sliderStyle);
-                    volumeSlider = GUI.VerticalSlider(new Rect(8.17f * sW, (2.75f * sH) + (spacer * sW), 2 * sW, 2 * sH), volumeSlider, 1, 0);
-                }
-                spacer++;
-                if (GUI.Button(new Rect(sW, (3.5f * sH) + (spacer * sW), 5f * sW, sH), "Brightness > " + (brightnessSlider * 100).ToString("F0"), optionsMenuStyler))//styler
-                {
-                    showBrightness = !showBrightness;
-                    showVolume = false;
-                    showResolution = false;
-                    showControls = false;
-                }
-                if (showBrightness)
-                {
-                    showVolume = false;
-                    GUI.Box(new Rect(8f * sW, (2.75f * sH) + (spacer * sW), 0.5f * sW, 2 * sH), "", sliderStyle);
-                    brightnessSlider = GUI.VerticalSlider(new Rect(8.17f * sW, (2.75f * sH) + (spacer * sW), 2 * sW, 2 * sH), brightnessSlider, 1, 0);
-                }
-                spacer++;
-                if (GUI.Button(new Rect(sW, (3.5f * sH) + (spacer * sW), 5f * sW, sH), "Resoultion  > " + currRes, optionsMenuStyler))//styler
-                {
-                    print("Resolution");
-                    showResolution = !showResolution;
-                    showBrightness = false;
-                    showVolume = false;
-                    showControls = false;
-                }
-                if (showResolution)
-                {
-                    float resSpace = 0;
-                    int screenArray = 0;
-                    scrollPositon = GUI.BeginScrollView(new Rect(6.25f * sW, (3.5f * sH) + (spacer * sW), 3.75f * sW, 2 * sH), scrollPositon, new Rect(sW, sH, 3 * sW, 4f * sH));
-                    for (int i = 0; i < 8; i++)
+                    GUI.Label(new Rect(0.25f * sW, 1f * sH, 0, 0), "Options", optionsStyler);
+                    if (GUI.Button(new Rect(sW, (3.5f * sH) + (spacer * sW), 5f * sW, sH), "Volume        > " + (volumeSlider * 100).ToString("F0"), optionsMenuStyler))//playStyler
                     {
-                        resSpace += 0.5f;
-                        if (GUI.Button(new Rect(sW, (0.5f*sH)+(resSpace * sW), 3.25f*sW, 0.5f*sH), " " + scrW[screenArray] + " x " + scrH[screenArray], resolutionStyler))
-                        {
-                            Screen.SetResolution(scrW[screenArray], scrH[screenArray], fullScreenMode);
-                        }
-                        screenArray++;
+                        showVolume = !showVolume;
+                        showBrightness = false;
+                        showResolution = false;
+                        showControls = false;
                     }
-                    GUI.EndScrollView();
+                    if (showVolume)
+                    {
+                        showBrightness = false;
+                        GUI.Box(new Rect(8f * sW, (2.75f * sH) + (spacer * sW), 0.5f * sW, 2 * sH), "", sliderStyle);
+                        volumeSlider = GUI.VerticalSlider(new Rect(8.17f * sW, (2.75f * sH) + (spacer * sW), 2 * sW, 2 * sH), volumeSlider, 1, 0);
+                    }
+                    spacer++;
+                    if (GUI.Button(new Rect(sW, (3.5f * sH) + (spacer * sW), 5f * sW, sH), "Brightness > " + (brightnessSlider * 100).ToString("F0"), optionsMenuStyler))//styler
+                    {
+                        showBrightness = !showBrightness;
+                        showVolume = false;
+                        showResolution = false;
+                        showControls = false;
+                    }
+                    if (showBrightness)
+                    {
+                        showVolume = false;
+                        GUI.Box(new Rect(8f * sW, (2.75f * sH) + (spacer * sW), 0.5f * sW, 2 * sH), "", sliderStyle);
+                        brightnessSlider = GUI.VerticalSlider(new Rect(8.17f * sW, (2.75f * sH) + (spacer * sW), 2 * sW, 2 * sH), brightnessSlider, 1, 0);
+                    }
+                    spacer++;
+                    if (GUI.Button(new Rect(sW, (3.5f * sH) + (spacer * sW), 5f * sW, sH), "Resoultion  > " + currRes, optionsMenuStyler))//styler
+                    {
+                        print("Resolution");
+                        showResolution = !showResolution;
+                        showBrightness = false;
+                        showVolume = false;
+                        showControls = false;
+                    }
+                    if (showResolution)
+                    {
+                        float resSpace = 0;
+                        int screenArray = 0;
+                        scrollPositon = GUI.BeginScrollView(new Rect(6.25f * sW, (3.5f * sH) + (spacer * sW), 3.75f * sW, 2 * sH), scrollPositon, new Rect(sW, sH, 3 * sW, 4f * sH));
+                        for (int i = 0; i < 8; i++)
+                        {
+                            resSpace += 0.5f;
+                            if (GUI.Button(new Rect(sW, (0.5f * sH) + (resSpace * sW), 3.25f * sW, 0.5f * sH), " " + scrW[screenArray] + " x " + scrH[screenArray], resolutionStyler))
+                            {
+                                Screen.SetResolution(scrW[screenArray], scrH[screenArray], fullScreenMode);
+                            }
+                            screenArray++;
+                        }
+                        GUI.EndScrollView();
+                        
+                    }
+
+                    spacer++;
+                    if (GUI.Button(new Rect(sW, (3.5f * sH) + (spacer * sW), 3.5f * sW, sH), "Controls", optionsMenuStyler))
+                    {
+                        showControls = !showControls;
+                        showBrightness = false;
+                        enableControls = false;
+                        showResolution = false;
+                        showVolume = false;
+                    }
+                    spacer++;
+                    if (GUI.Button(new Rect(sW, (3.5f * sH) + (spacer * sW), 2.25f * sW, sH), "Back", optionsMenuStyler))//styler
+                    {
+                        print("Going Back to main Menu");
+                        showOptions = false;
+                        enableControls = false;
+                    }
+                    if (GUI.Button(new Rect(4 * sW, (3.5f * sH) + (spacer * sW), 2.25f * sW, sH), "Apply", optionsMenuStyler))
+                    {
+                        WriteFile();
+                    }
+                    if (GUI.Button(new Rect(7 * sW, (3.5f * sH) + (spacer * sW), 2.25f * sW, sH), "Mute", optionsMenuStyler))
+                    {
+                        ToggleVol();
+                    }
                 }
-                
-                spacer++;
-                if(GUI.Button(new Rect(sW, (3.5f * sH) + (spacer * sW), 3.5f * sW, sH), "Controls", optionsMenuStyler))
-                {
-                    showControls = true;
-                    showBrightness = false;
-                    showOptions = false;
-                    showResolution = false;
-                    showVolume = false;
-                }
+
                 if (showControls)
                 {
-                    GUI.Box(new Rect(0, 0, 11 * sW, 10 * sH), "");
-                    //if ()
-                    //{
 
-                    //}
+                    // Debug.Log(e.keyCode);
+                    int controlSpacer = 0;
+                    GUI.Box(new Rect(0, 0, 11 * sW, 10 * sH), "");
+                    GUI.Label(new Rect(0.25f * sW, 1f * sH, 0, 0), "Controls", optionsStyler);
+                    scrollPositon = GUI.BeginScrollView(new Rect(sW, (3f * sH), 11 * sW, 4.5f * sH), scrollPositon, new Rect(sW, sH, 5 * sW, 8 * sH));
+                    if (GUI.Button(new Rect(sW, (sH) + (controlSpacer * sW), 4f * sW, sH), "Forward >      " + forward.ToString(), optionsMenuStyler))//styler
+                    {
+                        if (!(backward == KeyCode.None || right == KeyCode.None || left == KeyCode.None || crouch == KeyCode.None || jump == KeyCode.None || sprint == KeyCode.None || interact == KeyCode.None))
+                        {
+                            holdingKey = forward;
+                            forward = KeyCode.None;
+                            forwardText = forward.ToString();
+                        }
+                        if (forward == KeyCode.None)
+                        {
+                            if (e.isKey)
+                            {
+                                Debug.Log("Key: " + e.keyCode);
+                                if (!(e.keyCode == backward || e.keyCode == left || e.keyCode == right || e.keyCode == jump || e.keyCode == crouch || e.keyCode == sprint || e.keyCode == interact))
+                                {
+                                    forward = e.keyCode;
+                                    holdingKey = KeyCode.None;
+                                    forwardText = forward.ToString();
+                                }
+                                else
+                                {
+                                    forward = holdingKey;
+                                    holdingKey = KeyCode.None;
+                                    forwardText = forward.ToString();
+                                }
+
+                            }
+                        }
+                    }
+                    controlSpacer++;
+                    if (GUI.Button(new Rect(sW, (sH) + (controlSpacer * sW), 2.25f * sW, sH), "Backward >   " + backward.ToString(), optionsMenuStyler))//styler
+                    {
+                        if (!(forward == KeyCode.None || right == KeyCode.None || left == KeyCode.None || crouch == KeyCode.None || jump == KeyCode.None || sprint == KeyCode.None || interact == KeyCode.None))
+                        {
+                            holdingKey = backward;
+                            backward = KeyCode.None;
+                            if (backward == KeyCode.None)
+                            {
+                                if (e.isKey)
+                                {
+                                    Debug.Log("Key: " + e.keyCode);
+                                    if (!(e.keyCode == forward || e.keyCode == left || e.keyCode == right || e.keyCode == jump || e.keyCode == crouch || e.keyCode == sprint || e.keyCode == interact))
+                                    {
+                                        backward = e.keyCode;
+                                        holdingKey = KeyCode.None;
+                                        backwardText = backward.ToString();
+                                    }
+                                    else
+                                    {
+                                        backward = holdingKey;
+                                        holdingKey = KeyCode.None;
+                                        backwardText = backward.ToString();
+                                    }
+
+                                }
+                            }
+                        }
+
+                    }
+                    controlSpacer++;
+                    if (GUI.Button(new Rect(sW, (sH) + (controlSpacer * sW), 2.25f * sW, sH), "Left >             " + left.ToString(), optionsMenuStyler))//styler
+                    {
+                        if (!(backward == KeyCode.None || right == KeyCode.None || forward == KeyCode.None || crouch == KeyCode.None || jump == KeyCode.None || sprint == KeyCode.None || interact == KeyCode.None))
+                        {
+                            holdingKey = left;
+                            left = KeyCode.None;
+                        }
+                        if (left == KeyCode.None)
+                        {
+                            if (e.isKey)
+                            {
+                                Debug.Log("Key: " + e.keyCode);
+                                if (!(e.keyCode == backward || e.keyCode == forward || e.keyCode == right || e.keyCode == jump || e.keyCode == crouch || e.keyCode == sprint || e.keyCode == interact))
+                                {
+                                    left = e.keyCode;
+                                    holdingKey = KeyCode.None;
+                                    leftText = left.ToString();
+                                }
+                                else
+                                {
+                                    left = holdingKey;
+                                    holdingKey = KeyCode.None;
+                                    leftText = left.ToString();
+                                }
+                            }
+                        }
+                    }
+                    controlSpacer++;
+                    if (GUI.Button(new Rect(sW, (sH) + (controlSpacer * sW), 2.25f * sW, sH), "Right >          " + right.ToString(), optionsMenuStyler))//styler
+                    {
+                        if (!(backward == KeyCode.None || forward == KeyCode.None || left == KeyCode.None || crouch == KeyCode.None || jump == KeyCode.None || sprint == KeyCode.None || interact == KeyCode.None))
+                        {
+                            holdingKey = right;
+                            right = KeyCode.None;
+                        }
+                        if (right == KeyCode.None)
+                        {
+                            if (e.isKey)
+                            {
+                                Debug.Log("Key: " + e.keyCode);
+                                if (!(e.keyCode == backward || e.keyCode == left || e.keyCode == forward || e.keyCode == jump || e.keyCode == crouch || e.keyCode == sprint || e.keyCode == interact))
+                                {
+                                    right = e.keyCode;
+                                    holdingKey = KeyCode.None;
+                                    rightText = right.ToString();
+                                }
+                                else
+                                {
+                                    right = holdingKey;
+                                    holdingKey = KeyCode.None;
+                                    rightText = right.ToString();
+                                }
+
+                            }
+                        }
+                    }
+                    controlSpacer++;
+                    if (GUI.Button(new Rect(sW, (sH) + (controlSpacer * sW), 2.25f * sW, sH), "Jump >           " + jump.ToString(), optionsMenuStyler))//styler
+                    {
+                        if (!(backward == KeyCode.None || right == KeyCode.None || left == KeyCode.None || crouch == KeyCode.None || forward == KeyCode.None || sprint == KeyCode.None || interact == KeyCode.None))
+                        {
+                            holdingKey = jump;
+                            jump = KeyCode.None;
+                        }
+                        if (jump == KeyCode.None)
+                        {
+                            if (e.isKey)
+                            {
+                                Debug.Log("Key: " + e.keyCode);
+                                if (!(e.keyCode == backward || e.keyCode == left || e.keyCode == right || e.keyCode == forward || e.keyCode == crouch || e.keyCode == sprint || e.keyCode == interact))
+                                {
+                                    jump = e.keyCode;
+                                    holdingKey = KeyCode.None;
+                                    jumpText = jump.ToString();
+                                }
+                                else
+                                {
+                                    jump = holdingKey;
+                                    holdingKey = KeyCode.None;
+                                    jumpText = jump.ToString();
+                                }
+
+                            }
+                        }
+                    }
+                    controlSpacer++;
+                    if (GUI.Button(new Rect(sW, (sH) + (controlSpacer * sW), 2.25f * sW, sH), "Sprint >        " + sprint.ToString(), optionsMenuStyler))//styler
+                    {
+                        if (!(backward == KeyCode.None || right == KeyCode.None || left == KeyCode.None || crouch == KeyCode.None || jump == KeyCode.None || forward == KeyCode.None || interact == KeyCode.None))
+                        {
+                            holdingKey = sprint;
+                            sprint = KeyCode.None;
+                        }
+                        if (sprint == KeyCode.None)
+                        {
+                            if (e.isKey)
+                            {
+                                Debug.Log("Key: " + e.keyCode);
+                                if (!(e.keyCode == backward || e.keyCode == left || e.keyCode == right || e.keyCode == jump || e.keyCode == crouch || e.keyCode == forward || e.keyCode == interact))
+                                {
+                                    sprint = e.keyCode;
+                                    holdingKey = KeyCode.None;
+                                    sprintText = sprint.ToString();
+                                }
+                                else
+                                {
+                                    sprint = holdingKey;
+                                    holdingKey = KeyCode.None;
+                                    sprintText = sprint.ToString();
+                                }
+                            }
+                        }
+                    }
+                    controlSpacer++;
+                    if (GUI.Button(new Rect(sW, (sH) + (controlSpacer * sW), 2.25f * sW, sH), "Crouch >       " + crouch.ToString(), optionsMenuStyler))//styler
+                    {
+                        if (!(backward == KeyCode.None || right == KeyCode.None || left == KeyCode.None || forward == KeyCode.None || jump == KeyCode.None || sprint == KeyCode.None || interact == KeyCode.None))
+                        {
+                            holdingKey = crouch;
+                            crouch = KeyCode.None;
+                        }
+                        if (crouch == KeyCode.None)
+                        {
+                            if (e.isKey)
+                            {
+                                Debug.Log("Key: " + e.keyCode);
+                                if (!(e.keyCode == backward || e.keyCode == left || e.keyCode == right || e.keyCode == jump || e.keyCode == forward || e.keyCode == sprint || e.keyCode == interact))
+                                {
+                                    crouch = e.keyCode;
+                                    holdingKey = KeyCode.None;
+                                    crouchText = crouch.ToString();
+                                }
+                                else
+                                {
+                                    crouch = holdingKey;
+                                    holdingKey = KeyCode.None;
+                                    crouchText = crouch.ToString();
+                                }
+                            }
+                        }
+                    }
+                    controlSpacer++;
+                    if (GUI.Button(new Rect(sW, (sH) + (controlSpacer * sW), 2.25f * sW, sH), "Interact >     " + interact.ToString(), optionsMenuStyler))//styler
+                    {
+                        if (!(backward == KeyCode.None || right == KeyCode.None || left == KeyCode.None || crouch == KeyCode.None || jump == KeyCode.None || sprint == KeyCode.None || forward == KeyCode.None))
+                        {
+                            holdingKey = interact;
+                            interact = KeyCode.None;
+                        }
+                        if (interact == KeyCode.None)
+                        {
+                            if (e.isKey)
+                            {
+                                Debug.Log("Key: " + e.keyCode);
+                                if (!(e.keyCode == backward || e.keyCode == left || e.keyCode == right || e.keyCode == jump || e.keyCode == crouch || e.keyCode == sprint || e.keyCode == forward))
+                                {
+                                    interact = e.keyCode;
+                                    holdingKey = KeyCode.None;
+                                    interactText = interact.ToString();
+                                }
+                                else
+                                {
+                                    interact = holdingKey;
+                                    holdingKey = KeyCode.None;
+                                    interactText = interact.ToString();
+                                }
+
+                            }
+                        }
+                    }
+                    GUI.EndScrollView();
+
+                    if (GUI.Button(new Rect(sW, (sH) + (controlSpacer * sW), 2.25f * sW, sH), "Back >       ", optionsMenuStyler))//styler
+                    {
+                        print("Going Back to main Menu");
+                        showControls = !showControls;
+                        enableControls = true;
+                        showOptions = true;
+                    }
                 }
-                spacer++;
-                if (GUI.Button(new Rect(sW, (3.5f * sH) + (spacer * sW), 2.25f*sW, sH), "Back", optionsMenuStyler))//styler
-                {
-                    print("Going Back to main Menu");
-                    showOptions = false;
-                }
-                if (GUI.Button(new Rect(4 * sW, (3.5f * sH) + (spacer * sW), 2.25f * sW, sH), "Apply", optionsMenuStyler))
-                {
-                    WriteFile();
-                }
             }
         }
-        #region Keybinding
-        public void Forward()
+        bool ToggleVol()
         {
-            //if none of the other keys are blank
-            //then we can make edit this key
-            if (!(backward == KeyCode.None || right == KeyCode.None || left == KeyCode.None || crouch == KeyCode.None || jump == KeyCode.None || sprint == KeyCode.None || interact == KeyCode.None))
+            if (muteToggle == true)
             {
-                //set our holding key to the key of this button
-                holdingKey = forward;
-                //set this button to none allowing only this to be editable
-                forward = KeyCode.None;
+                muteToggle = false;
+                volumeSlider = holdingVolume;
+                return false;
+            }
+            else
+            {
+                muteToggle = true;
+                holdingVolume = volumeSlider;
+                volumeSlider = 0;
+                music.volume = 0;
+                return true;
             }
         }
-        public void Backward()
-        {
-            //if none of the other keys are blank
-            //then we can make edit this key
-            if (!(forward == KeyCode.None || right == KeyCode.None || left == KeyCode.None || crouch == KeyCode.None || jump == KeyCode.None || sprint == KeyCode.None || interact == KeyCode.None))
-            {
-                //set our holding key to the key of this button
-                holdingKey = backward;
-                //set this button to none allowing only this to be editable
-                backward = KeyCode.None;
-            }
-        }
-        public void Left()
-        {
-            //if none of the other keys are blank
-            //then we can make edit this key
-            if (!(backward == KeyCode.None || right == KeyCode.None || forward == KeyCode.None || crouch == KeyCode.None || jump == KeyCode.None || sprint == KeyCode.None || interact == KeyCode.None))
-            {
-                //set our holding key to the key of this button
-                holdingKey = left;
-                //set this button to none allowing only this to be editable
-                left = KeyCode.None;
-            }
-        }
-        public void Right()
-        {
-            //if none of the other keys are blank
-            //then we can make edit this key
-            if (!(backward == KeyCode.None || forward == KeyCode.None || left == KeyCode.None || crouch == KeyCode.None || jump == KeyCode.None || sprint == KeyCode.None || interact == KeyCode.None))
-            {
-                //set our holding key to the key of this button
-                holdingKey = right;
-                //set this button to none allowing only this to be editable
-                right = KeyCode.None;
-            }
-        }
-        public void Jump()
-        {
-            //if none of the other keys are blank
-            //then we can make edit this key
-            if (!(backward == KeyCode.None || right == KeyCode.None || left == KeyCode.None || crouch == KeyCode.None || forward == KeyCode.None || sprint == KeyCode.None || interact == KeyCode.None))
-            {
-                //set our holding key to the key of this button
-                holdingKey = jump;
-                //set this button to none allowing only this to be editable
-                jump = KeyCode.None;
-            }
-        }
-        public void Crouch()
-        {
-            //if none of the other keys are blank
-            //then we can make edit this key
-            if (!(backward == KeyCode.None || right == KeyCode.None || left == KeyCode.None || forward == KeyCode.None || jump == KeyCode.None || sprint == KeyCode.None || interact == KeyCode.None))
-            {
-                //set our holding key to the key of this button
-                holdingKey = crouch;
-                //set this button to none allowing only this to be editable
-                crouch = KeyCode.None;
-            }
-        }
-        public void Sprint()
-        {
-            //if none of the other keys are blank
-            //then we can make edit this key
-            if (!(backward == KeyCode.None || right == KeyCode.None || left == KeyCode.None || crouch == KeyCode.None || jump == KeyCode.None || forward == KeyCode.None || interact == KeyCode.None))
-            {
-                //set our holding key to the key of this button
-                holdingKey = sprint;
-                //set this button to none allowing only this to be editable
-                sprint = KeyCode.None;
-            }
-        }
-        public void Interact()
-        {
-            //if none of the other keys are blank
-            //then we can make edit this key
-            if (!(backward == KeyCode.None || right == KeyCode.None || left == KeyCode.None || crouch == KeyCode.None || jump == KeyCode.None || sprint == KeyCode.None || forward == KeyCode.None))
-            {
-                //set our holding key to the key of this button
-                holdingKey = interact;
-                //set this button to none allowing only this to be editable
-                interact = KeyCode.None;
-            }
-        }
-        #endregion
+
     }
 }
