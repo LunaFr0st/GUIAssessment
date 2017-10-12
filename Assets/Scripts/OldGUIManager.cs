@@ -13,6 +13,7 @@ namespace AssignmentGUI
         public GUIStyle styler = new GUIStyle();
         public GUIStyle optionsStyler = new GUIStyle();
         public GUIStyle optionsMenuStyler = new GUIStyle();
+        public GUIStyle resolutionStyler = new GUIStyle();
         public GUILayout layout = new GUILayout();
         public GUIStyle boxStyle = new GUIStyle();
         public GUIStyle sliderStyle = new GUIStyle();
@@ -38,12 +39,13 @@ namespace AssignmentGUI
         public bool showVolume;
         public bool showBrightness;
         public bool showResolution;
+        public bool fullScreenMode;
         public bool startRGB;
         [Header("Text")]
         private string currRes;
         [Header("Resolution")]
-        private int[] scrH;
-        private int[] scrW;
+        public int[] scrH;
+        public int[] scrW;
         [Header("Sliders")]
         public float volumeSlider, holdingVolume;
         public float brightnessSlider;
@@ -68,7 +70,41 @@ namespace AssignmentGUI
 
             //ini.Open("C:/Users/cody.amies1/Source/Repos/GUIAssessment/Assets/Scripts");
             ini.Open(path + "/Scripts/GUIAssesment.ini");
-            volumeSlider = ini.ReadValue("Sliders", "bVolume", 1);
+            Debug.Log(ini.ReadValue("Sliders", "bVolume", "bVolume"));
+            //KeyBinds Strings
+            string forwardText = ini.ReadValue("Key Binds", "inputForward", "inputForward");
+            string backwardText = ini.ReadValue("Key Binds", "inputBackward", "inputBackward");
+            string leftText = ini.ReadValue("Key Binds", "inputLeft", "inputLeft");
+            string rightText = ini.ReadValue("Key Binds", "inputRight", "inputRight");
+            string interactText = ini.ReadValue("Key Binds", "inputInteract", "inputInteract");
+            string jumpText = ini.ReadValue("Key Binds", "inputJump", "inputJump");
+            string crouchText = ini.ReadValue("Key Binds", "inputCrouch", "inputCrouch");
+            string sprintText = ini.ReadValue("Key Binds", "inputSprint", "inputSprint");
+            //Slider Values
+            string volumeValue = ini.ReadValue("Sliders", "bVolume", "bVolume");
+            string brightnessValue = ini.ReadValue("Sliders", "bBrightness", "bBrightness");
+            //Resolution Values
+            string resXValue = ini.ReadValue("Resolution", "bScreenX", "bScreenX");
+            string resYValue = ini.ReadValue("Resolution", "bScreenY", "bScreenY");
+            //Bool Values
+            string RGBBool = ini.ReadValue("Booleans", "bRGBMode", "bRGBMode");
+            //Conversion KeyBinds
+            forward = (KeyCode)System.Enum.Parse(typeof(KeyCode), forwardText);
+            backward = (KeyCode)System.Enum.Parse(typeof(KeyCode), backwardText);
+            left = (KeyCode)System.Enum.Parse(typeof(KeyCode), leftText);
+            right = (KeyCode)System.Enum.Parse(typeof(KeyCode), rightText);
+            interact = (KeyCode)System.Enum.Parse(typeof(KeyCode), interactText);
+            jump = (KeyCode)System.Enum.Parse(typeof(KeyCode), jumpText);
+            crouch = (KeyCode)System.Enum.Parse(typeof(KeyCode), crouchText);
+            sprint = (KeyCode)System.Enum.Parse(typeof(KeyCode), sprintText);
+            //Conversion Sliders
+            volumeSlider = float.Parse(volumeValue);
+            brightnessSlider = float.Parse(brightnessValue);
+            //Conversion Resolution
+            sW = int.Parse(resXValue);
+            sH = int.Parse(resYValue);
+            //Bool convert
+            startRGB = bool.Parse(RGBBool);
             ini.Close();
         }
 
@@ -111,6 +147,18 @@ namespace AssignmentGUI
 
             ini.Open(path + "/Scripts/GUIAssesment.ini");
             ini.WriteValue("Sliders", "bVolume", volumeSlider);
+            ini.WriteValue("Sliders", "bBrightness", brightnessSlider);
+            ini.WriteValue("Key Codes", "inputForward", forward.ToString());
+            ini.WriteValue("Key Codes", "inputBackward", backward.ToString());
+            ini.WriteValue("Key Codes", "inputLeft", left.ToString());
+            ini.WriteValue("Key Codes", "inputRight", right.ToString());
+            ini.WriteValue("Key Codes", "inputInteract", interact.ToString());
+            ini.WriteValue("Key Codes", "inputJump", jump.ToString());
+            ini.WriteValue("Key Codes", "inputCrouch", crouch.ToString());
+            ini.WriteValue("Key Codes", "inputSprint", sprint.ToString());
+            ini.WriteValue("Resolution", "bScreenX", sW);
+            ini.WriteValue("Resolution", "bScreenY", sH);
+            ini.WriteValue("Booleans", "bRGBMode", startRGB);
             ini.Close();
         }
         public void Load()
@@ -151,6 +199,13 @@ namespace AssignmentGUI
             optionsMenuStyler.hover.textColor = Color.white;
             optionsMenuStyler.active.textColor = Color.red;
 
+            //Resolution Buttons Styling
+            resolutionStyler.fontSize = ((Screen.width / 48) + (Screen.height / 36));
+            resolutionStyler.font = font;
+            resolutionStyler.normal.textColor = Color.HSVToRGB(hue, saturation, value);
+            resolutionStyler.hover.textColor = Color.white;
+            resolutionStyler.active.textColor = Color.red;
+
             //Slider Styling
             sliderStyle.active.background = sliderBG;
             #endregion
@@ -178,13 +233,14 @@ namespace AssignmentGUI
             if (showOptions)
             {
                 int spacer = 0;
-                GUI.Box(new Rect(0, 0, 9 * sW, 10 * sH), "");
+                GUI.Box(new Rect(0, 0, 11 * sW, 10 * sH), "");
                 GUI.Label(new Rect(0.25f * sW, 1f * sH, 0, 0), "Options", optionsStyler);
                 if (GUI.Button(new Rect(sW, (3.5f * sH) + (spacer * sW), 5f * sW, sH), "Volume        > " + (volumeSlider * 100).ToString("F0"), optionsMenuStyler))//playStyler
                 {
                     showVolume = !showVolume;
                     showBrightness = false;
                     showResolution = false;
+                    showControls = false;
                 }
                 if (showVolume)
                 {
@@ -198,6 +254,7 @@ namespace AssignmentGUI
                     showBrightness = !showBrightness;
                     showVolume = false;
                     showResolution = false;
+                    showControls = false;
                 }
                 if (showBrightness)
                 {
@@ -212,26 +269,51 @@ namespace AssignmentGUI
                     showResolution = !showResolution;
                     showBrightness = false;
                     showVolume = false;
+                    showControls = false;
                 }
                 if (showResolution)
                 {
-                    scrollPositon =  GUI.BeginScrollView(new Rect(6.25f * sW, (3.5f * sH) + (spacer * sW), 2.75f * sW, 3*sH), scrollPositon, new Rect(sW, sH, 3*sW, 6*sH));
-                    if (GUI.Button(new Rect(6.25f * sW, (3.5f * sH) + (spacer * sW), 2.75f * sW, sH), "", optionsMenuStyler))
+                    float resSpace = 0;
+                    int screenArray = 0;
+                    scrollPositon = GUI.BeginScrollView(new Rect(6.25f * sW, (3.5f * sH) + (spacer * sW), 3.75f * sW, 2 * sH), scrollPositon, new Rect(sW, sH, 3 * sW, 4f * sH));
+                    for (int i = 0; i < 8; i++)
                     {
-                        GUI.Box(new Rect(sW, sH, sW, sH), "");
+                        resSpace += 0.5f;
+                        if (GUI.Button(new Rect(sW, (0.5f*sH)+(resSpace * sW), 3.25f*sW, 0.5f*sH), " " + scrW[screenArray] + " x " + scrH[screenArray], resolutionStyler))
+                        {
+                            Screen.SetResolution(scrW[screenArray], scrH[screenArray], fullScreenMode);
+                        }
+                        screenArray++;
                     }
                     GUI.EndScrollView();
                 }
+                
                 spacer++;
-                if (GUI.Button(new Rect(sW, (3.5f * sH) + (spacer * sW), sW, sH), "Apply", optionsMenuStyler))
+                if(GUI.Button(new Rect(sW, (3.5f * sH) + (spacer * sW), 3.5f * sW, sH), "Controls", optionsMenuStyler))
                 {
-                    WriteFile();
+                    showControls = true;
+                    showBrightness = false;
+                    showOptions = false;
+                    showResolution = false;
+                    showVolume = false;
+                }
+                if (showControls)
+                {
+                    GUI.Box(new Rect(0, 0, 11 * sW, 10 * sH), "");
+                    //if ()
+                    //{
+
+                    //}
                 }
                 spacer++;
-                if (GUI.Button(new Rect(sW, (3.5f * sH) + (spacer * sW), sW, sH), "Back", optionsMenuStyler))//styler
+                if (GUI.Button(new Rect(sW, (3.5f * sH) + (spacer * sW), 2.25f*sW, sH), "Back", optionsMenuStyler))//styler
                 {
                     print("Going Back to main Menu");
                     showOptions = false;
+                }
+                if (GUI.Button(new Rect(4 * sW, (3.5f * sH) + (spacer * sW), 2.25f * sW, sH), "Apply", optionsMenuStyler))
+                {
+                    WriteFile();
                 }
             }
         }
