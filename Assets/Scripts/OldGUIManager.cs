@@ -110,18 +110,31 @@ namespace AssignmentGUI
             sW = int.Parse(resXValue);
             sH = int.Parse(resYValue);
             //Bool convert
-            startRGB = Convert.ToBoolean(RGBBool);
+            
             ini.Close();
 
             dirLight = GameObject.FindGameObjectWithTag("MainLight").GetComponent<Light>();
             music = GameObject.Find("MainMusic").GetComponent<AudioSource>();
             volumeSlider = music.volume;
             brightnessSlider = dirLight.intensity;
+            string swapOne = "1";
+            if (RGBBool == swapOne)
+            {
+                RGBBool = "true";
+            }
+            else
+            {
+                RGBBool = "false";
+            }
+            startRGB = Convert.ToBoolean(RGBBool);
         }
 
 
         void Update()
         {
+            
+
+
 
             sW = Screen.width / 16;
             sH = Screen.height / 9;
